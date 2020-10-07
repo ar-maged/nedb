@@ -1,3 +1,5 @@
+## `@ar-maged/nedb`
+
 ### Append-only persistence
 
 The `autocompact` option is set to `false` by default, which hinders the initial compaction of the database. 
