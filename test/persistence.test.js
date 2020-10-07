@@ -15,7 +15,7 @@ describe('Persistence', function () {
   var d;
 
   beforeEach(function (done) {
-    d = new Datastore({ filename: testDb });
+    d = new Datastore({ filename: testDb, autocompact: true });
     d.filename.should.equal(testDb);
     d.inMemoryOnly.should.equal(false);
 
@@ -359,7 +359,7 @@ describe('Persistence', function () {
     fs.writeFileSync(corruptTestFilename, fakeData, 'utf8');
 
     // Default corruptAlertThreshold
-    d = new Datastore({ filename: corruptTestFilename });
+    d = new Datastore({ filename: corruptTestFilename, autocompact: true });
     d.loadDatabase(function (err) {
       assert.isDefined(err);
       assert.isNotNull(err);
@@ -367,7 +367,8 @@ describe('Persistence', function () {
       fs.writeFileSync(corruptTestFilename, fakeData, 'utf8');
       d = new Datastore({
         filename: corruptTestFilename,
-        corruptAlertThreshold: 1
+        corruptAlertThreshold: 1,
+        autocompact: true
       });
       d.loadDatabase(function (err) {
         assert.isNull(err);
@@ -375,7 +376,8 @@ describe('Persistence', function () {
         fs.writeFileSync(corruptTestFilename, fakeData, 'utf8');
         d = new Datastore({
           filename: corruptTestFilename,
-          corruptAlertThreshold: 0
+          corruptAlertThreshold: 0,
+          autocompact: true
         });
         d.loadDatabase(function (err) {
           assert.isDefined(err);
@@ -413,6 +415,7 @@ describe('Persistence', function () {
           new Datastore({
             filename: hookTestFilename,
             autoload: true,
+            autocompact: true,
             afterSerialization: as
           });
         }.should.throw());
@@ -424,6 +427,7 @@ describe('Persistence', function () {
           new Datastore({
             filename: hookTestFilename,
             autoload: true,
+            autocompact: true,
             beforeDeserialization: bd
           });
         }.should.throw());
@@ -444,6 +448,7 @@ describe('Persistence', function () {
           new Datastore({
             filename: hookTestFilename,
             autoload: true,
+            autocompact: true,
             afterSerialization: as,
             beforeDeserialization: function (s) {
               return s;
@@ -464,6 +469,7 @@ describe('Persistence', function () {
         var d = new Datastore({
           filename: hookTestFilename,
           autoload: true,
+          autocompact: true,
           afterSerialization: as,
           beforeDeserialization: bd
         });
@@ -539,6 +545,7 @@ describe('Persistence', function () {
         var d = new Datastore({
           filename: hookTestFilename,
           autoload: true,
+          autocompact: true,
           afterSerialization: as,
           beforeDeserialization: bd
         });
@@ -611,6 +618,7 @@ describe('Persistence', function () {
         var d = new Datastore({
           filename: hookTestFilename,
           autoload: true,
+          autocompact: true,
           afterSerialization: as,
           beforeDeserialization: bd
         });
@@ -631,6 +639,7 @@ describe('Persistence', function () {
                     // Everything is deserialized correctly, including deletes and indexes
                     var d = new Datastore({
                       filename: hookTestFilename,
+                      autocompact: true,
                       afterSerialization: as,
                       beforeDeserialization: bd
                     });
@@ -660,18 +669,26 @@ describe('Persistence', function () {
 
   describe('Prevent dataloss when persisting data', function () {
     it('Creating a datastore with in memory as true and a bad filename wont cause an error', function () {
-      new Datastore({ filename: 'workspace/bad.db~', inMemoryOnly: true });
+      new Datastore({
+        filename: 'workspace/bad.db~',
+        inMemoryOnly: true,
+        autocompact: true
+      });
     });
 
     it('Creating a persistent datastore with a bad filename will cause an error', function () {
       (function () {
-        new Datastore({ filename: 'workspace/bad.db~' });
+        new Datastore({ filename: 'workspace/bad.db~', autocompact: true });
       }.should.throw());
     });
 
     it('If no file exists, ensureDatafileIntegrity creates an empty datafile', function (done) {
       var p = new Persistence({
-        db: { inMemoryOnly: false, filename: 'workspace/it.db' }
+        db: {
+          inMemoryOnly: false,
+          filename: 'workspace/it.db',
+          autocompact: true
+        }
       });
 
       if (fs.existsSync('workspace/it.db')) {
@@ -698,7 +715,11 @@ describe('Persistence', function () {
 
     it('If only datafile exists, ensureDatafileIntegrity will use it', function (done) {
       var p = new Persistence({
-        db: { inMemoryOnly: false, filename: 'workspace/it.db' }
+        db: {
+          inMemoryOnly: false,
+          filename: 'workspace/it.db',
+          autocompact: true
+        }
       });
 
       if (fs.existsSync('workspace/it.db')) {
@@ -727,7 +748,11 @@ describe('Persistence', function () {
 
     it('If temp datafile exists and datafile doesnt, ensureDatafileIntegrity will use it (cannot happen except upon first use)', function (done) {
       var p = new Persistence({
-        db: { inMemoryOnly: false, filename: 'workspace/it.db' }
+        db: {
+          inMemoryOnly: false,
+          filename: 'workspace/it.db',
+          autocompact: true
+        }
       });
 
       if (fs.existsSync('workspace/it.db')) {
@@ -756,7 +781,10 @@ describe('Persistence', function () {
 
     // Technically it could also mean the write was successful but the rename wasn't, but there is in any case no guarantee that the data in the temp file is whole so we have to discard the whole file
     it('If both temp and current datafiles exist, ensureDatafileIntegrity will use the datafile, as it means that the write of the temp file failed', function (done) {
-      var theDb = new Datastore({ filename: 'workspace/it.db' });
+      var theDb = new Datastore({
+        filename: 'workspace/it.db',
+        autocompact: true
+      });
 
       if (fs.existsSync('workspace/it.db')) {
         fs.unlinkSync('workspace/it.db');
@@ -909,7 +937,7 @@ describe('Persistence', function () {
         fs.unlinkSync(dbFile + '~');
       }
 
-      theDb = new Datastore({ filename: dbFile });
+      theDb = new Datastore({ filename: dbFile, autocompact: true });
 
       theDb.loadDatabase(function (err) {
         var contents = fs.readFileSync(dbFile, 'utf8');
@@ -935,7 +963,7 @@ describe('Persistence', function () {
           async.apply(storage.ensureFileDoesntExist, dbFile),
           async.apply(storage.ensureFileDoesntExist, dbFile + '~'),
           function (cb) {
-            theDb = new Datastore({ filename: dbFile });
+            theDb = new Datastore({ filename: dbFile, autocompact: true });
             theDb.loadDatabase(cb);
           },
           function (cb) {
@@ -992,7 +1020,7 @@ describe('Persistence', function () {
             return cb();
           },
           function (cb) {
-            theDb2 = new Datastore({ filename: dbFile });
+            theDb2 = new Datastore({ filename: dbFile, autocompact: true });
             theDb2.loadDatabase(cb);
           },
           function (cb) {
@@ -1059,7 +1087,10 @@ describe('Persistence', function () {
           );
 
           // Reload database without a crash, check that no data was lost and fs state is clean (no temp file)
-          var db = new Datastore({ filename: 'workspace/lac.db' });
+          var db = new Datastore({
+            filename: 'workspace/lac.db',
+            autocompact: true
+          });
           db.loadDatabase(function (err) {
             assert.isNull(err);
 

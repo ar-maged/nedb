@@ -145,14 +145,20 @@ describe('Model', function () {
         fs.unlinkSync('workspace/test1.db');
       }
       fs.existsSync('workspace/test1.db').should.equal(false);
-      db1 = new Datastore({ filename: 'workspace/test1.db' });
+      db1 = new Datastore({
+        filename: 'workspace/test1.db',
+        autocompact: true
+      });
 
       db1.loadDatabase(function (err) {
         assert.isNull(err);
         db1.insert({ hello: badString }, function (err) {
           assert.isNull(err);
 
-          db2 = new Datastore({ filename: 'workspace/test1.db' });
+          db2 = new Datastore({
+            filename: 'workspace/test1.db',
+            autocompact: true
+          });
           db2.loadDatabase(function (err) {
             assert.isNull(err);
             db2.find({}, function (err, docs) {

@@ -132,7 +132,7 @@ describe('Executor', function () {
     var d;
 
     beforeEach(function (done) {
-      d = new Datastore({ filename: testDb });
+      d = new Datastore({ filename: testDb, autocompact: true });
       d.filename.should.equal(testDb);
       d.inMemoryOnly.should.equal(false);
 
@@ -189,7 +189,7 @@ describe('Executor', function () {
     var d;
 
     beforeEach(function (done) {
-      d = new Datastore({ inMemoryOnly: true });
+      d = new Datastore({ inMemoryOnly: true, autocompact: true });
       d.inMemoryOnly.should.equal(true);
 
       d.loadDatabase(function (err) {

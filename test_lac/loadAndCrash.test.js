@@ -121,5 +121,5 @@ fs.writeFile = function (path, data, options, callback_) {
 
 // End of fs modification
 var Nedb = require('../lib/datastore.js'),
-  db = new Nedb({ filename: 'workspace/lac.db' });
+  db = new Nedb({ filename: 'workspace/lac.db', autocompact: true });
 db.loadDatabase();

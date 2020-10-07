@@ -13,7 +13,7 @@ describe('Cursor', function () {
   var d;
 
   beforeEach(function (done) {
-    d = new Datastore({ filename: testDb });
+    d = new Datastore({ filename: testDb, autocompact: true });
     d.filename.should.equal(testDb);
     d.inMemoryOnly.should.equal(false);
 
@@ -227,6 +227,7 @@ describe('Cursor', function () {
       var db = new Datastore({
         inMemoryOnly: true,
         autoload: true,
+        autocompact: true,
         compareStrings: function (a, b) {
           return a.length - b.length;
         }
